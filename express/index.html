@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link href="/dist/output.css" rel="stylesheet"> -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <title>Document</title>
+</head>
+
+<body class="w-screen h-screen p-4">
+    <div class="bg-white w-screen h-screen flex flex-col items-center justify-start">
+        <p class="text-blue-700 text-2xl py-4">Movies List</p>
+        <div class="flex flex-row justify-start items-start">
+            <input
+                class="shadow appearance-none border rounded w-full py-2 px-3 mr-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="search" type="text" placeholder="Search title..." />
+            <button id="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="button" onclick="displayMovies()">Search</button>
+        </div>
+        <div class="w-full h-full">
+            <table class="table-fixed border-collapse border border-slate-400">
+                <thead>
+                    <tr>
+                        <th class="border border-slate-300">Title</th>
+                        <th class="border border-slate-300">Poster</th>
+                        <th class="border border-slate-300">Genre</th>
+                        <th class="border border-slate-300">Imdb Rating</th>
+                        <th class="border border-slate-300">Year Released</th>
+                        <th class="border border-slate-300">Metacritic Rating</th>
+                        <th class="border border-slate-300">Runtime</th>
+                    </tr>
+                </thead>
+                <tbody id="movieDiv">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<script>
+    let moviesData = []
+    function getFilteredData(inputVal) {
+        console.log('input val: ', inputVal)
+        let result = moviesData
+        for (let d in moviesData) {
+            for (let mov in moviesData[d]) {
+                if (moviesData[d][mov].title === inputVal) {
+                    result = [{ "date": "", "movies": [moviesData[d][mov]] }]
+                }
+            }
+        }
+        console.log('result: ', result)
+        moviesData = result
+        return moviesData
+        // var result = data.filter(obj => obj.)
+    }
+
+    function displayMovies(data) {
+        moviesData = data;
+        let inputVal = document.getElementById("search").value;
+        console.log('input val: ', inputVal)
+        console.log('type: ', typeof (inputVal))
+        if (inputVal !== "" && inputVal !== undefined) {
+            moviesData = getFilteredData(inputVal)
+        }
+        console.log('after: ', moviesData)
+        const moviesDiv = document.getElementById("movieDiv");
+
+        for (let key in moviesData) {
+            // console.log('key: ', moviesData[key])
+            let movies = moviesData[key].movies
+            for (let mKey in movies) {
+                // console.log('mkey: ', mKey)
+                const movieList = document.createElement("tr");
+                let dispKeys = ['title', 'poster', 'genre', 'imdb_rating', 'year', 'meta_rating', 'runtime']
+                for (let dkey in dispKeys) {
+                    console.log('dkey: ', dkey)
+                    if (dispKeys[dkey] === 'meta_rating') {
+                        // console.log('meta rating')
+                        let meta_rating = '';
+                        for (let rating in movies[mKey].Ratings) {
+                            let meta_r = movies[mKey].Ratings[rating].source
+                            if (meta_r !== null && meta_r === 'Metacritic') {
+                                meta_rating = movies[mKey].Ratings[rating].value
+                            }
+                        }
+                        listItem = document.createElement("td");
+                        listItem.innerHTML = meta_rating;
+                    }
+                    else if (dispKeys[dkey] === 'poster') {
+                        listItem = document.createElement("td");
+                        imgItem = document.createElement("img");
+                        imgItem.src = movies[mKey][dispKeys[dkey]];
+                        imgItem.width = 60
+                        imgItem.height = 60
+                        listItem.appendChild(imgItem);
+                    }
+                    else {
+                        listItem = document.createElement("td");
+                        listItem.innerHTML = movies[mKey][dispKeys[dkey]];
+                    }
+                    listItem.className = "text-center border border-slate-300"
+                    movieList.appendChild(listItem);
+                }
+                moviesDiv.appendChild(movieList);
+            }
+        }
+    }
+
+    fetch("http://127.0.0.1:3000/movies")
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("NETWORK RESPONSE ERROR");
+            }
+        })
+        .then(data => {
+            console.log('Data: ', data);
+            displayMovies(data)
+        })
+        .catch((error) => console.error("FETCH ERROR:", error));
+</script>
+
+</html>
