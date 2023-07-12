@@ -18,9 +18,9 @@
                 id="search" type="text" placeholder="Search title..." />
             <button id="submit"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="button" onclick="displayMovies()">Search</button>
+                type="button" onclick="onSearchClick()">Search</button>
         </div>
-        <div class="w-full h-full">
+        <div class="w-full p-10 flex flex-col justify-center">
             <table class="table-fixed border-collapse border border-slate-400">
                 <thead>
                     <tr>
@@ -40,32 +40,49 @@
     </div>
 </body>
 <script>
-    let moviesData = []
-    function getFilteredData(inputVal) {
-        console.log('input val: ', inputVal)
-        let result = moviesData
-        for (let d in moviesData) {
-            for (let mov in moviesData[d]) {
-                if (moviesData[d][mov].title === inputVal) {
-                    result = [{ "date": "", "movies": [moviesData[d][mov]] }]
-                }
-            }
-        }
-        console.log('result: ', result)
-        moviesData = result
-        return moviesData
-        // var result = data.filter(obj => obj.)
+    function onSearchClick() {
+	    fetch("http://127.0.0.1:3000/movies")
+	        .then((response) => {
+	            if (response.ok) {
+	                return response.json();
+	            } else {
+	                throw new Error("NETWORK RESPONSE ERROR");
+	            }
+	        })
+	        .then(data => {
+	            
+	            let moviesData = data
+		        let result = []
+		        let inputVal = document.getElementById("search").value;
+		        
+		        if (inputVal !== "" && inputVal !== undefined) {
+					console.log('input val: ', inputVal)
+		            for (let dt in moviesData) {
+		                for (let mov in moviesData[dt].movies) {
+							
+		                    if (moviesData[dt].movies[mov].title === inputVal) {
+								console.log('resulted: ', [moviesData[dt].movies[mov]])
+		                        result = [{ "date": "", "movies":[moviesData[dt].movies[mov]] }] 
+								console.log('result: ', result)
+		                    }
+		                }
+		            }
+		        }
+		        
+		        const moviesDiv = document.getElementById("movieDiv");
+				while (moviesDiv.firstChild) {
+				    moviesDiv.removeChild(moviesDiv.lastChild);
+				  }
+		        displayMovies(result)
+	        })
+	        .catch((error) => console.error("FETCH ERROR:", error));
     }
-
+    
     function displayMovies(data) {
-        moviesData = data;
-        let inputVal = document.getElementById("search").value;
-        console.log('input val: ', inputVal)
-        console.log('type: ', typeof (inputVal))
-        if (inputVal !== "" && inputVal !== undefined) {
-            moviesData = getFilteredData(inputVal)
-        }
-        console.log('after: ', moviesData)
+        
+        let moviesData = data;
+        
+        // console.log('after: ', moviesData)
         const moviesDiv = document.getElementById("movieDiv");
 
         for (let key in moviesData) {
