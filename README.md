@@ -1,5 +1,11 @@
 # The Movies@Mariana
 
+## To run the application
+yarn install
+yarn start
+
+And navigate to http://127.0.0.1:3000/
+
 ## Prompt
 
 Mariana Tek is hosting a series of events calledThe Movies@Mariana Tek this summer for camaraderie purposes. We want to be as democratic as possible, so each night we will have 3 choices that we can vote on. We need to create a small application where everyone can view the movies on the schedule, separated by date. These movies should be in a list with the following information:
